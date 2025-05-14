@@ -1,0 +1,110 @@
+package com.dilshan.chat_app.service;
+
+import com.dilshan.chat_app.entity.User;
+import com.dilshan.chat_app.exception.IncorrectOtpException;
+import com.dilshan.chat_app.exception.RegisteredUserException;
+import com.dilshan.chat_app.exception.UserNotFoundException;
+import com.dilshan.chat_app.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
+import java.util.Random;
+
+@Service
+public class UserService {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private static final int OTP_LENGTH = 6;
+    private static final int OTP_VALIDITY_MINUTES = 5;
+
+
+    @Autowired
+    UserRepository userRepository;
+
+    private final Random random = new Random();
+
+    @Async
+    public void sendOtpAsync(String phoneNumber) throws UserNotFoundException {
+        String otp = generateOtp(OTP_LENGTH);
+        Optional<User> searchUser = userRepository.findByPhoneNumber(phoneNumber);
+        if(searchUser.isPresent()){
+            User user = searchUser.get();
+            user.setOtp(otp);
+            user.setOtpCreatedAt(LocalDateTime.now());
+            user.setVerified(false);
+            userRepository.save(user);
+            logger.info("OTP sent to phone number: {}", phoneNumber);
+           sendOtpNotification(phoneNumber, otp);
+        }
+        else {
+            logger.warn("Attempted OTP sent to unregistered phone number: {}", phoneNumber);
+            throw new UserNotFoundException("Phone Number Not Registered!");
+        }
+    }
+
+    private void sendOtpNotification(String phoneNumber, String otp){
+        logger.info("Simulating sending OTP '{}' to phone number: {}", otp, phoneNumber);
+    }
+
+
+@Transactional
+    public boolean verifyOtp(String phoneNumber, String otp) throws UserNotFoundException {
+        Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
+        if(optionalUser.isPresent()){
+            User user = optionalUser.get();
+           if(user.getOtp() != null && user.getOtpCreatedAt() != null && LocalDateTime.now().isBefore(user.getOtpCreatedAt().plus(OTP_VALIDITY_MINUTES, ChronoUnit.MINUTES))){
+               if(user.getOtp().equals(otp)){
+                   user.setVerified(true);
+                   user.setOtp(null);
+                   user.setOtpCreatedAt(null);
+                   userRepository.save(user);
+                   logger.info("OTP Verified for phone number: {}", phoneNumber);
+                   return true;
+               }else{
+                   logger.warn("Incorrect OTP provided for phonr number: {}", phoneNumber);
+                   throw new IncorrectOtpException("Incorrect OTP!");
+               }
+           }else{
+               logger.warn("OTP expired for phone number: {}", phoneNumber);
+               user.setVerified(false);
+               user.setOtp(null);
+               user.setOtpCreatedAt(null);
+               userRepository.save(user);
+               return false;
+           }
+        }else {
+            logger.warn("Attempted OTP sent to unregistered phone number: {}", phoneNumber);
+            throw new UserNotFoundException("Phone Number Not Registered!");
+
+        }
+    }
+
+    @Transactional
+    public User registerPhoneNumber(String name, String phoneNumber){
+        Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
+        if (optionalUser.isPresent()){
+            logger.warn("Attempted registration with already registered phone number: {}", phoneNumber);
+throw new RegisteredUserException("This Phone Number Already Registered!");
+        }else {
+            User user = new User(name, phoneNumber);
+            userRepository.save(user);
+            logger.info("New user registered with phone number: {}", phoneNumber);
+            return user;
+        }
+    }
+
+    private String generateOtp(int length){
+        StringBuilder otp = new StringBuilder();
+        for (int i = 0; i<length; i++){
+            otp.append(random.nextInt(10));
+        }
+        return otp.toString();
+    }
+}
