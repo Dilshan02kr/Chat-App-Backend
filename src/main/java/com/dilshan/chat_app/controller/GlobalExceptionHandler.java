@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IncorrectOtpException.class)
     public ResponseEntity<Map<String, String>> handleIncorrectOtpException(IncorrectOtpException ex) {
         Map<String, String> error = new HashMap<>();
-        error.put("error", "Authentication Failed");
+        error.put("Error", "Authentication Failed");
         error.put("message", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
     }
@@ -43,8 +43,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
         Map<String, String> error = new HashMap<>();
-        error.put("error", "Internal Server Error");
-        error.put("message", "An unexpected error occurred.");
+        error.put("Error", "Internal Server Error");
+        error.put("message", "An unexpected error occurred: "+ex.getMessage());
         // Consider logging the full error details.
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
