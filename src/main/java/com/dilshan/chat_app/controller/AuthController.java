@@ -2,6 +2,7 @@ package com.dilshan.chat_app.controller;
 
 import com.dilshan.chat_app.entity.User;
 import com.dilshan.chat_app.exception.UserNotFoundException;
+import com.dilshan.chat_app.security.JwtTokenProvider;
 import com.dilshan.chat_app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,9 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody Map<String, String> payload){
@@ -80,8 +84,10 @@ public class AuthController {
         boolean isVerified = userService.verifyOtp(phoneNumber, otp);
 
         if(isVerified){
+            String token =jwtTokenProvider.generateToken(phoneNumber);
             Map<String, String> response = new HashMap<>();
             response.put("message", "Phone number verified successfully.");
+            response.put("token", token);
 
             return ResponseEntity.ok(response);
         }else {
