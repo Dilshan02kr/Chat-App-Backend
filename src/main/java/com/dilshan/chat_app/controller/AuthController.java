@@ -7,10 +7,7 @@ import com.dilshan.chat_app.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +21,8 @@ public class AuthController {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
+
+
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody Map<String, String> payload){
@@ -44,6 +43,9 @@ public class AuthController {
         response.put("message", "User registered successfully.");
         response.put("userId", regUser.getId().toString());
         response.put("phoneNumber", regUser.getPhoneNumber());
+        response.put("code", "0");
+
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -97,4 +99,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
     }
+
+
 }
