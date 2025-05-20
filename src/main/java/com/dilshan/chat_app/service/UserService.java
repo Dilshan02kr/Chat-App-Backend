@@ -53,6 +53,16 @@ public class UserService {
         logger.info("Simulating sending OTP '{}' to phone number: {}", otp, phoneNumber);
     }
 
+    public User getUserByPhoneNumber(String phoneNumber) throws UserNotFoundException {
+        Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
+        if(optionalUser.isPresent()){
+            User user = optionalUser.get();
+            return user;
+        }else{
+            throw new UserNotFoundException("Phone Number Not Registered!");
+        }
+    }
+
 
 @Transactional
     public boolean verifyOtp(String phoneNumber, String otp) throws UserNotFoundException {
