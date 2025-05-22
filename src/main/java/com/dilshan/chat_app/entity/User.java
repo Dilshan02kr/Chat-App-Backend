@@ -28,6 +28,14 @@ public class User {
     @Column(nullable = false)
     private boolean isVerified;
 
+
+    @Column(length = 2048)
+    private String profileImageUrl;
+
+    @Column(length = 500)
+    private String about;
+
+
     public User() {
     }
 
@@ -45,6 +53,8 @@ public class User {
         this.otp = null;
         this.isVerified = false;
         this.otpCreatedAt = null;
+        this.profileImageUrl = null;
+        this.about = null;
     }
 
     public User(Long id, String name, String phoneNumber, String otp, boolean isVerified) {
@@ -55,6 +65,45 @@ public class User {
         this.isVerified = isVerified;
         this.otpCreatedAt = LocalDateTime.now();
     }
+
+
+    public User(Long id, String name, String phoneNumber, String otp, LocalDateTime otpCreatedAt, boolean isVerified, String profileImageUrl, String about) {
+        this.id = id;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.otp = otp;
+        this.otpCreatedAt = otpCreatedAt;
+        this.isVerified = isVerified;
+        this.profileImageUrl = profileImageUrl;
+        this.about = about;
+    }
+
+    public User(String name, String phoneNumber, String otp, LocalDateTime otpCreatedAt, boolean isVerified, String profileImageUrl, String about) {
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.otp = otp;
+        this.otpCreatedAt = otpCreatedAt;
+        this.isVerified = isVerified;
+        this.profileImageUrl = profileImageUrl;
+        this.about = about;
+    }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getAbout() {
+        return about;
+    }
+
+    public void setAbout(String about) {
+        this.about = about;
+    }
+
 
     public Long getId() {
         return id;

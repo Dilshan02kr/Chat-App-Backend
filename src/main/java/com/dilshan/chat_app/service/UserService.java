@@ -110,6 +110,34 @@ throw new RegisteredUserException("This Phone Number Already Registered!");
         }
     }
 
+    @Transactional
+    public User updateProfile(String phoneNumber, String name, String about, String profileImageUrl) throws UserNotFoundException {
+        Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+
+            if (name != null && !name.trim().isEmpty()) {
+                user.setName(name.trim());
+            }
+            if (about != null) {
+                user.setAbout(about.trim());
+            }
+            if (profileImageUrl != null && !profileImageUrl.trim().isEmpty()) {
+                user.setProfileImageUrl(profileImageUrl.trim());
+            } else if (profileImageUrl != null && profileImageUrl.trim().isEmpty()) {
+                user.setProfileImageUrl(null);
+            }
+
+
+            User updatedUser = userRepository.save(user);
+            logger.info("User profile updated for phone number: {}", phoneNumber);
+            return updatedUser;
+        } else {
+            logger.warn("Attempted to update profile for unregistered phone number: {}", phoneNumber);
+            throw new UserNotFoundException("User not found with phone number: " + phoneNumber);
+        }
+    }
+
     private String generateOtp(int length){
         StringBuilder otp = new StringBuilder();
         for (int i = 0; i<length; i++){
