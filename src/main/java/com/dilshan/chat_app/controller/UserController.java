@@ -43,6 +43,23 @@ public class UserController {
         return ResponseEntity.ok(userProfileDTO);
     }
 
+    @GetMapping("/by-phone/{phoneNumber}")
+    public  ResponseEntity<UserProfileDTO> getUserByPhoneNumber(@PathVariable String phoneNumber) throws UserNotFoundException {
+        User user = userService.getUserByPhoneNumber(phoneNumber);
+
+        UserProfileDTO userProfileDTO = new UserProfileDTO(
+                user.getId(),
+                user.getName(),
+                user.getPhoneNumber(),
+                user.getAbout(),
+                user.getProfileImageUrl(),
+                user.isVerified()
+        );
+
+        return ResponseEntity.ok(userProfileDTO);
+
+    }
+
 
     @PutMapping("/profile")
     public ResponseEntity<UserProfileDTO> updateProfile(@Valid @RequestBody UserProfileDTO updateDTO, Principal principal) throws UserNotFoundException {

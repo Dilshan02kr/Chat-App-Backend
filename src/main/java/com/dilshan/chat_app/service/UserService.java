@@ -45,7 +45,7 @@ public class UserService {
         }
         else {
             logger.warn("Attempted OTP sent to unregistered phone number: {}", phoneNumber);
-            throw new UserNotFoundException("Phone Number Not Registered!");
+            throw new UserNotFoundException("This user is not registered to Chatoo app");
         }
     }
 
@@ -59,7 +59,7 @@ public class UserService {
             User user = optionalUser.get();
             return user;
         }else{
-            throw new UserNotFoundException("Phone Number Not Registered!");
+            throw new UserNotFoundException("This user is not registered to Chatoo app");
         }
     }
 
@@ -91,7 +91,7 @@ public class UserService {
            }
         }else {
             logger.warn("Attempted OTP sent to unregistered phone number: {}", phoneNumber);
-            throw new UserNotFoundException("Phone Number Not Registered!");
+            throw new UserNotFoundException("This user is not registered to Chatoo app");
 
         }
     }
