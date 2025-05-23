@@ -88,16 +88,18 @@ public class AuthController {
         if(isVerified){
             String token =jwtTokenProvider.generateToken(phoneNumber);
             User user = userService.getUserByPhoneNumber(phoneNumber);
+            Long id = user.getId();
             String name = user.getName();
             String about = user.getAbout();
             String profileImageUrl = user.getProfileImageUrl();
             Map<String, String> response = new HashMap<>();
             response.put("message", "Phone number verified successfully.");
+            response.put("id", String.valueOf(id));
             response.put("token", token);
             response.put("name", name);
             response.put("phoneNumber", phoneNumber);
             response.put("about", about);
-            response.put("proImg", profileImageUrl);
+            response.put("profileImageUrl", profileImageUrl);
 
             return ResponseEntity.ok(response);
         }else {

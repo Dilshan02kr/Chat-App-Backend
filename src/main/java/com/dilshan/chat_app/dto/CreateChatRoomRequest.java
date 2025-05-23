@@ -14,8 +14,17 @@ public class CreateChatRoomRequest {
 
     private String name;
 
-    @NotNull(message = "Participant IDs are required") // Added message for clarity
+    @NotNull(message = "Participant IDs are required")
     private List<Long> participantIds;
+
+
+    public @NotNull(message = "Chat type is required") ChatRoom.ChatType getType() {
+        return type;
+    }
+
+    public void setType(@NotNull(message = "Chat type is required") ChatRoom.ChatType type) {
+        this.type = type;
+    }
 
     public CreateChatRoomRequest() {
     }
@@ -24,14 +33,6 @@ public class CreateChatRoomRequest {
         this.type = type;
         this.name = name;
         this.participantIds = participantIds;
-    }
-
-    public @NotNull(message = "Chat type is required") ChatRoom.ChatType getType() {
-        return type;
-    }
-
-    public void setType(@NotNull(message = "Chat type is required") ChatRoom.ChatType type) {
-        this.type = type;
     }
 
     public String getName() {
