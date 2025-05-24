@@ -55,6 +55,7 @@ public class ChatMessageService {
         return convertToDto(message);
     }
 
+    @Transactional(readOnly = true)
     public List<ChatMessageDTO> getMessagesByChatRoomId(String chatRoomId) {
         ChatRoom chatRoom = chatRoomRepository.findByChatId(chatRoomId)
                 .orElseThrow(() -> new IllegalArgumentException("Chat room not found with ID: " + chatRoomId));
@@ -63,6 +64,15 @@ public class ChatMessageService {
         return messages.stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
+    }
+
+    // Fixed method to get a single ChatMessageDTO by ID with eager loading
+    @Transactional(readOnly = true)
+    public ChatMessageDTO getChatMessageById(Long messageId) {
+        // Use a custom query to eagerly fetch related entities
+        ChatMessage message = chatMessageRepository.findByIdWithChatRoomAndSender(messageId)
+                .orElseThrow(() -> new IllegalArgumentException("Message not found with ID: " + messageId));
+        return convertToDto(message);
     }
 
     private ChatMessageDTO convertToDto(ChatMessage message) {

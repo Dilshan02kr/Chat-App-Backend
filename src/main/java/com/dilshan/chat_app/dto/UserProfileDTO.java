@@ -34,9 +34,15 @@ public class UserProfileDTO {
         this.phoneNumber = phoneNumber;
         this.about = about;
         this.profileImageUrl = profileImageUrl;
-
+        this.isVerified = isVerified;
     }
 
+    public UserProfileDTO(Long id, String phoneNumber, String name, String profileImageUrl) {
+        this.id = id;
+        this.phoneNumber = phoneNumber;
+        this.name = name;
+        this.profileImageUrl = profileImageUrl;
+    }
 
     public Long getId() {
         return id;

@@ -2,18 +2,23 @@ package com.dilshan.chat_app.repository;
 
 import com.dilshan.chat_app.entity.ChatMessage;
 import com.dilshan.chat_app.entity.ChatRoom;
-import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
 
     List<ChatMessage> findByChatRoomOrderByTimestampAsc(ChatRoom chatRoom);
 
-    // You might also need to find messages for a chat room with pagination for large histories
-    //Page<ChatMessage> findByChatRoomOrderByTimestampAsc(ChatRoom chatRoom, Pageable pageable);
-
+    // Custom query to eagerly fetch ChatRoom and Sender entities
+    @Query("SELECT cm FROM ChatMessage cm " +
+            "JOIN FETCH cm.chatRoom " +
+            "JOIN FETCH cm.sender " +
+            "WHERE cm.id = :messageId")
+    Optional<ChatMessage> findByIdWithChatRoomAndSender(@Param("messageId") Long messageId);
 }

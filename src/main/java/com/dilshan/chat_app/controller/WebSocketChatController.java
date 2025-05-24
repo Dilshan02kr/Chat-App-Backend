@@ -2,6 +2,7 @@ package com.dilshan.chat_app.controller;
 
 import com.dilshan.chat_app.dto.ChatMessageDTO;
 import com.dilshan.chat_app.dto.MessageRequestDTO;
+import com.dilshan.chat_app.entity.ChatMessage;
 import com.dilshan.chat_app.exception.UserNotFoundException;
 import com.dilshan.chat_app.service.ChatMessageService;
 import com.dilshan.chat_app.service.UserService;
@@ -36,35 +37,62 @@ public class WebSocketChatController {
                     messageRequestDTO.getContent()
             );
 
+            // Broadcast the newly saved message to all participants in the chat room
             simpMessagingTemplate.convertAndSend("/topic/chat/" + savedMessage.getChatRoomId(), savedMessage);
+            System.out.println("Backend: Sent message ID " + savedMessage.getId() + " with status " + savedMessage.getStatus() + " to chat room " + savedMessage.getChatRoomId());
 
         } catch (UserNotFoundException | IllegalArgumentException e) {
-
             System.err.println("Error sending message: " + e.getMessage());
-
+            // Consider sending an error message back to the sender if needed,
+            // e.g., to a user-specific queue.
         } catch (Exception e) {
             System.err.println("Unexpected error during message sending: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    /**
-     * (Optional) Example of handling user joining a chat.
-     * Clients can send messages to "/app/chat.addUser" when they join a room.
-     * This could be used for presence tracking or initial setup.
-     *
-     * @param principal The authenticated user's principal.
-     * @param headerAccessor Accessor for STOMP headers, useful for getting session ID.
-     */
-    // @MessageMapping("/chat.addUser")
-    // public void addUser(Principal principal, SimpMessageHeaderAccessor headerAccessor) {
-    //     // Add user to WebSocket session attributes
-    //     // You might use this to track active users in a chat room,
-    //     // or to set up private queues for user-specific notifications.
-    //     System.out.println("User added: " + principal.getName() + " to session: " + headerAccessor.getSessionId());
-    //     // headerAccessor.getSessionAttributes().put("username", principal.getName());
-    //
-    //     // You might also broadcast a "user joined" message to the room if needed
-    //     // messagingTemplate.convertAndSend("/topic/public", principal.getName() + " joined!");
-    // }
+    @MessageMapping("/chat.markAsDelivered")
+    public void markAsDelivered(@Payload ChatMessageDTO messageDTO, Principal principal) {
+        try {
+            // Validate if the principal (recipient) is a participant in the chat and the message is for them.
+            // For simplicity, we assume the messageDTO.getId() is valid and the backend handles permissions.
+            // The service method should only update if the status is SENT or PENDING to DELIVERED.
+            chatMessageService.updateMessageStatus(messageDTO.getId(), ChatMessage.MessageStatus.DELIVERED);
+
+            // Fetch the updated message to ensure all fields are correct for broadcasting
+            ChatMessageDTO updatedMessage = chatMessageService.getChatMessageById(messageDTO.getId());
+
+            // Broadcast the updated message to all participants in the chat room
+            simpMessagingTemplate.convertAndSend("/topic/chat/" + updatedMessage.getChatRoomId(), updatedMessage);
+            System.out.println("Backend: Marked message ID " + updatedMessage.getId() + " as DELIVERED and broadcasted.");
+
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error marking message as delivered: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error during marking message as delivered: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @MessageMapping("/chat.markAsRead")
+    public void markAsRead(@Payload ChatMessageDTO messageDTO, Principal principal) {
+        try {
+            // Validate if the principal (recipient) is a participant in the chat and the message is for them.
+            // The service method should only update if the status is SENT, PENDING, or DELIVERED to READ.
+            chatMessageService.updateMessageStatus(messageDTO.getId(), ChatMessage.MessageStatus.READ);
+
+            // Fetch the updated message to ensure all fields are correct for broadcasting
+            ChatMessageDTO updatedMessage = chatMessageService.getChatMessageById(messageDTO.getId());
+
+            // Broadcast the updated message to all participants in the chat room
+            simpMessagingTemplate.convertAndSend("/topic/chat/" + updatedMessage.getChatRoomId(), updatedMessage);
+            System.out.println("Backend: Marked message ID " + updatedMessage.getId() + " as READ and broadcasted.");
+
+        } catch (IllegalArgumentException e) {
+            System.err.println("Error marking message as read: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Unexpected error during marking message as read: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }
