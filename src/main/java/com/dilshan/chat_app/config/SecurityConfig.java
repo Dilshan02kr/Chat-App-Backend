@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth
+                                .requestMatchers("/ws/**").permitAll()
                                 .requestMatchers("/api/auth/register", "/api/auth/send-otp", "/api/auth/verify-otp")
                                 .permitAll()
                                 .anyRequest()
