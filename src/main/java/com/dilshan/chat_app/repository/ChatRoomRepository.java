@@ -1,10 +1,12 @@
 package com.dilshan.chat_app.repository;
 
+import com.dilshan.chat_app.entity.ChatMessage;
 import com.dilshan.chat_app.entity.ChatRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,4 +20,7 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, Long> {
 
     @Query("SELECT cr FROM ChatRoom cr JOIN cr.participants p WHERE p.id = :userId")
     List<ChatRoom> findChatRoomsByParticipantId(@Param("userId") Long userId);
+
+    @Query("SELECT cm FROM ChatMessage cm JOIN cm.chatRoom cr WHERE cr.chatId = :chatRoomChatId ORDER BY cm.timestamp DESC LIMIT 1")
+    Optional<ChatMessage> findLatestMessageByChatRoomChatId(@Param("chatRoomChatId") String chatRoomChatId);
 }
