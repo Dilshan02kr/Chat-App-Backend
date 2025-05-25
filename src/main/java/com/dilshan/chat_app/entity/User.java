@@ -20,6 +20,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
+    private String email;
+
     @Column(nullable = false, unique = true)
     private String phoneNumber;
 
@@ -61,6 +64,17 @@ public class User implements UserDetails {
         this.about = null;
     }
 
+    public User(String name, String email, String phoneNumber) {
+        this.name = name;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.otp = null;
+        this.isVerified = false;
+        this.otpCreatedAt = null;
+        this.profileImageUrl = null;
+        this.about = null;
+    }
+
     public User(Long id, String name, String phoneNumber, String otp, boolean isVerified) {
         this.id = id;
         this.name = name;
@@ -90,6 +104,14 @@ public class User implements UserDetails {
         this.isVerified = isVerified;
         this.profileImageUrl = profileImageUrl;
         this.about = about;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getProfileImageUrl() {
