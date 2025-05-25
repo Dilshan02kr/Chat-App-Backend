@@ -3,6 +3,7 @@ package com.dilshan.chat_app.service;
 import com.dilshan.chat_app.dto.ChatRoomDTO;
 import com.dilshan.chat_app.dto.CreateChatRoomRequest;
 import com.dilshan.chat_app.dto.UserProfileDTO;
+import com.dilshan.chat_app.entity.ChatMessage;
 import com.dilshan.chat_app.entity.ChatRoom;
 import com.dilshan.chat_app.entity.User;
 import com.dilshan.chat_app.exception.UserNotFoundException;
@@ -78,6 +79,9 @@ public class ChatRoomService {
         return chatRoomRepository.findByChatId(chatId);
     }
 
+    public Optional<ChatMessage> getLatestMessage(String chatId){
+        return chatRoomRepository.findLatestMessageByChatRoomChatId(chatId);
+    }
 
     private ChatRoomDTO convertToDto(ChatRoom chatRoom) {
         List<UserProfileDTO> participantDTOs = chatRoom.getParticipants().stream()

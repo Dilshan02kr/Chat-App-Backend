@@ -4,6 +4,8 @@ package com.dilshan.chat_app.controller;
 import com.dilshan.chat_app.dto.ChatMessageDTO;
 import com.dilshan.chat_app.dto.ChatRoomDTO;
 import com.dilshan.chat_app.dto.CreateChatRoomRequest;
+import com.dilshan.chat_app.dto.UserProfileDTO;
+import com.dilshan.chat_app.entity.ChatMessage;
 import com.dilshan.chat_app.entity.ChatRoom;
 import com.dilshan.chat_app.entity.User;
 import com.dilshan.chat_app.exception.UserNotFoundException;
@@ -62,6 +64,80 @@ public class ChatRoomController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+//    @GetMapping("/rooms/{chatId}/latest")
+//    public ResponseEntity<ChatMessageDTO> getLatestMsg(@PathVariable String chatId){
+//        try{
+//            Optional<ChatMessage> chatMessage = chatRoomService.getLatestMessage(chatId);
+//            if (chatMessage == null){
+//                throw new Exception("No Any Message To Show!");
+//            }
+//
+//            UserProfileDTO userProfileDTO = new UserProfileDTO(
+//                    chatMessage.get().getSender().getId(),
+//                    chatMessage.get().getSender().getPhoneNumber(),
+//                    chatMessage.get().getSender().getName(),
+//                    chatMessage.get().getSender().getProfileImageUrl()
+//            );
+//
+//            ChatMessageDTO chatMessageDTO = new ChatMessageDTO(
+//                    chatMessage.get().getId(),
+//                    chatId,
+//                    userProfileDTO,
+//                    chatMessage.get().getContent(),
+//                    chatMessage.get().getTimestamp(),
+//                    chatMessage.get().getStatus()
+//            );
+//
+//            return new ResponseEntity<>(chatMessageDTO, HttpStatus.OK);
+//
+//
+//        } catch (Exception e) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
+
+    @GetMapping("/rooms/{chatId}/latest")
+    public ResponseEntity<ChatMessageDTO> getLatestMsg(@PathVariable String chatId){
+        try{
+            Optional<ChatMessage> chatMessageOptional = chatRoomService.getLatestMessage(chatId); // Renamed for clarity
+
+            if (chatMessageOptional.isEmpty()){ // Correctly check if Optional is empty
+                // You might return 204 No Content or a specific 404 for no messages yet
+                // For a "latest message" endpoint, if no messages exist, 204 No Content is appropriate,
+                // or 404 if the chat room itself doesn't exist.
+                // Assuming the chat room exists but has no messages, 204 is better.
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            ChatMessage chatMessage = chatMessageOptional.get();
+
+            UserProfileDTO userProfileDTO = new UserProfileDTO(
+                    chatMessage.getSender().getId(),
+                    chatMessage.getSender().getPhoneNumber(),
+                    chatMessage.getSender().getName(),
+                    chatMessage.getSender().getProfileImageUrl()
+            );
+
+            // Ensure you have a constructor in ChatMessageDTO that matches these parameters
+            ChatMessageDTO chatMessageDTO = new ChatMessageDTO(
+                    chatMessage.getId(),
+                    chatId, // The chatId String from path variable
+                    userProfileDTO,
+                    chatMessage.getContent(),
+                    chatMessage.getTimestamp(),
+                    chatMessage.getStatus()
+            );
+
+            return new ResponseEntity<>(chatMessageDTO, HttpStatus.OK);
+
+        } catch (Exception e) {
+            // Log the exception for debugging
+            System.err.println("Error fetching latest message for chat ID " + chatId + ": " + e.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // Use 500 for unexpected errors
+        }
+    }
+
 
     @GetMapping("/rooms/{chatId}/messages")
     public ResponseEntity<List<ChatMessageDTO>> getChatMessages(@PathVariable String chatId, Authentication authentication) {
