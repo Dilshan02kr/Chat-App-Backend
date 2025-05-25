@@ -28,8 +28,9 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestBody Map<String, String> payload){
         String name = payload.get("name");
         String phoneNumber = payload.get("phoneNumber");
+        String email = payload.get("email");
 
-        if(name == null || name.trim().isEmpty() || phoneNumber == null || phoneNumber.trim().isEmpty()){
+        if(name == null || name.trim().isEmpty() || phoneNumber == null || phoneNumber.trim().isEmpty() || email == null || email.trim().isEmpty()){
             Map<String, String> error = new HashMap<>();
             error.put("Error", "Bad Request");
             error.put("message", "Name and phone number are required!");
@@ -37,7 +38,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(error);
         }
 
-        User regUser = userService.registerPhoneNumber(name, phoneNumber );
+        User regUser = userService.registerPhoneNumber(name, email,phoneNumber );
         Map<String, String> response = new HashMap<>();
 
         response.put("message", "User registered successfully.");

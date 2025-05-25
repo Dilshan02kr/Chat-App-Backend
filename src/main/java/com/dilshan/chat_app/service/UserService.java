@@ -28,6 +28,9 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     private final Random random = new Random();
 
     @Async
@@ -41,7 +44,7 @@ public class UserService {
             user.setVerified(false);
             userRepository.save(user);
             logger.info("OTP sent to phone number: {}", phoneNumber);
-           sendOtpNotification(phoneNumber, otp);
+           sendOtpNotification(user.getEmail(), otp);
         }
         else {
             logger.warn("Attempted OTP sent to unregistered phone number: {}", phoneNumber);
@@ -49,8 +52,9 @@ public class UserService {
         }
     }
 
-    private void sendOtpNotification(String phoneNumber, String otp){
-        logger.info("Simulating sending OTP '{}' to phone number: {}", otp, phoneNumber);
+    private void sendOtpNotification(String email, String otp){
+        logger.info("Simulating sending OTP '{}' to phone number: {}", otp, email);
+        emailService.sendOtpEmail(email, otp);
     }
 
     public User getUserByPhoneNumber(String phoneNumber) throws UserNotFoundException {
@@ -97,13 +101,13 @@ public class UserService {
     }
 
     @Transactional
-    public User registerPhoneNumber(String name, String phoneNumber){
+    public User registerPhoneNumber(String name, String email, String phoneNumber){
         Optional<User> optionalUser = userRepository.findByPhoneNumber(phoneNumber);
         if (optionalUser.isPresent()){
             logger.warn("Attempted registration with already registered phone number: {}", phoneNumber);
 throw new RegisteredUserException("This Phone Number Already Registered!");
         }else {
-            User user = new User(name, phoneNumber);
+            User user = new User(name, email, phoneNumber);
             userRepository.save(user);
             logger.info("New user registered with phone number: {}", phoneNumber);
             return user;
