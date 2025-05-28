@@ -4,6 +4,7 @@ import com.dilshan.chat_app.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -32,6 +33,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Keep this for OPTIONS preflight
+                                // Explicitly permit all methods for WebSocket/SockJS paths
+                                .requestMatchers(HttpMethod.GET, "/ws/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/ws/**").permitAll()
                                 .requestMatchers("/ws/**").permitAll()
                                 .requestMatchers("/api/auth/register", "/api/auth/send-otp", "/api/auth/verify-otp")
                                 .permitAll()
@@ -46,7 +51,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Allow your frontend origin
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost")); // Allow your frontend origin
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -54,6 +59,7 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/ws/**", configuration);
         return source;
     }
 }
