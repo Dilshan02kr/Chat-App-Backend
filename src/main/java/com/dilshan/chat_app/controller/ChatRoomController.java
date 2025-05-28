@@ -65,38 +65,6 @@ public class ChatRoomController {
         }
     }
 
-//    @GetMapping("/rooms/{chatId}/latest")
-//    public ResponseEntity<ChatMessageDTO> getLatestMsg(@PathVariable String chatId){
-//        try{
-//            Optional<ChatMessage> chatMessage = chatRoomService.getLatestMessage(chatId);
-//            if (chatMessage == null){
-//                throw new Exception("No Any Message To Show!");
-//            }
-//
-//            UserProfileDTO userProfileDTO = new UserProfileDTO(
-//                    chatMessage.get().getSender().getId(),
-//                    chatMessage.get().getSender().getPhoneNumber(),
-//                    chatMessage.get().getSender().getName(),
-//                    chatMessage.get().getSender().getProfileImageUrl()
-//            );
-//
-//            ChatMessageDTO chatMessageDTO = new ChatMessageDTO(
-//                    chatMessage.get().getId(),
-//                    chatId,
-//                    userProfileDTO,
-//                    chatMessage.get().getContent(),
-//                    chatMessage.get().getTimestamp(),
-//                    chatMessage.get().getStatus()
-//            );
-//
-//            return new ResponseEntity<>(chatMessageDTO, HttpStatus.OK);
-//
-//
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//    }
-
     @GetMapping("/rooms/{chatId}/latest")
     public ResponseEntity<ChatMessageDTO> getLatestMsg(@PathVariable String chatId){
         try{
